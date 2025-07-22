@@ -1,6 +1,5 @@
-// script.js
-
 const responseBox = document.getElementById("response");
+let isBusy = false;
 
 document.getElementById("wouldYouBtn").addEventListener("click", () => handleClick("would you rather"));
 document.getElementById("iceBtn").addEventListener("click", () => handleClick("icebreaker"));
@@ -9,9 +8,13 @@ document.getElementById("jokeBtn").addEventListener("click", () => handleClick("
 document.getElementById("weatherBtn").addEventListener("click", () => handleClick("weather prompt"));
 
 async function handleClick(type) {
+  if (isBusy) return;
+  isBusy = true;
+  disableButtons(true);
   responseBox.textContent = "Loading... 🔄";
 
-  const context = document.getElementById("contextInput").value.trim();
+  const contextInput = document.getElementById("contextInput");
+  const context = contextInput ? contextInput.value.trim() : "";
 
   let basePrompt;
   switch (type) {
@@ -32,10 +35,11 @@ async function handleClick(type) {
       break;
     default:
       responseBox.textContent = "❌ Unknown button type.";
+      isBusy = false;
+      disableButtons(false);
       return;
   }
 
-  // Add user context if provided
   const fullPrompt = context
     ? `${basePrompt} The context is: ${context}`
     : basePrompt;
@@ -54,34 +58,39 @@ async function handleClick(type) {
       })
     });
 
-    if (!result.ok) {
-      throw new Error(`HTTP error: ${result.status}`);
-    }
+    if (!result.ok) throw new Error(`HTTP error: ${result.status}`);
 
     const data = await result.json();
     const reply = data.choices[0].message.content.trim();
-    typeText(reply);
+    await typeText(reply);
 
   } catch (error) {
     console.error("Error:", error);
     responseBox.textContent = "😓 Something went wrong. Try again in a moment!";
   }
+
+  isBusy = false;
+  disableButtons(false);
 }
 
-
-// Typing effect function
 function typeText(text) {
-  responseBox.textContent = "";
-  let index = 0;
+  return new Promise((resolve) => {
+    responseBox.textContent = "";
+    let index = 0;
+    const speed = 20;
 
-  const speed = 20; // typing speed in ms
+    const interval = setInterval(() => {
+      if (index < text.length) {
+        responseBox.textContent += text.charAt(index++);
+      } else {
+        clearInterval(interval);
+        resolve();
+      }
+    }, speed);
+  });
+}
 
-  const interval = setInterval(() => {
-    if (index < text.length) {
-      responseBox.textContent += text.charAt(index);
-      index++;
-    } else {
-      clearInterval(interval);
-    }
-  }, speed);
+function disableButtons(disable) {
+  const buttons = document.querySelectorAll("#icebreaker-buttons button");
+  buttons.forEach((btn) => btn.disabled = disable);
 }
