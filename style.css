@@ -62,7 +62,7 @@ p {
 
 #icebreaker-buttons {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   justify-content: stretch;
   align-items: stretch;
   margin-top: 30px;
@@ -71,7 +71,7 @@ p {
 
 #icebreaker-buttons button {
   flex: 1 1 0;
-  font-size: 17px;
+  font-size: 13px;
   padding: 12px 0; /* Remove horizontal padding to allow more space for content */
   background: linear-gradient(to bottom, #f3e8ff 0%, #e0e7ff 100%);
   color: #5e548e;
